@@ -1,0 +1,23 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+  - name: Get AWS region
+    shell: curl http://169.254.169.254/latest/dynamic/instance-identity/document|grep region|awk -F\" '{print $4}'
+    register: REGION  
+  - name: Download SGS, GCI and RCI stack playbook 
+    shell: aws s3 cp s3://ansible-autostack/plays/AnsibleMAGAWS_SgsGciRci.yml  ./ --region {{ REGION.stdout }}  
+  - name: SGS, GCI and RCI stack creation
+    shell: ansible-playbook AnsibleMAGAWS_SgsGciRci.yml -e "region={{ REGION.stdout }}" 
+  - name: Download RDS stack playbook 
+    shell: aws s3 cp s3://ansible-autostack/plays/AnsibleMAGAWS_Rds.yml  ./ --region {{ REGION.stdout }}  
+  - name: RDS stack creation
+    shell: ansible-playbook AnsibleMAGAWS_Rds.yml -e "region={{ REGION.stdout }}"  
+  - name: Download NFS stack playbook 
+    shell: aws s3 cp s3://ansible-autostack/plays/AnsibleMAGAWS_Nfs.yml  ./ --region {{ REGION.stdout }}  
+  - name: NFS stack creation
+    shell: ansible-playbook AnsibleMAGAWS_Nfs.yml -e "region={{ REGION.stdout }}"
+  - name: Download App stack playbook 
+    shell: aws s3 cp s3://ansible-autostack/plays/AnsibleMAGAWS_App.yml  ./ --region {{ REGION.stdout }}  
+  - name: App stack creation
+    shell: ansible-playbook AnsibleMAGAWS_App.yml -e "region={{ REGION.stdout }}"
